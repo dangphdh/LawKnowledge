@@ -44,8 +44,8 @@ class CodificationCrawler:
             with zipfile.ZipFile(CodificationCrawler.ZIP_FILE, 'r') as zip_ref:
                 zip_ref.extractall(CodificationCrawler.RAW_DATA_FOLDER)
             os.remove(CodificationCrawler.ZIP_FILE)
-            os.remove(f"{CodificationCrawler.RAW_DATA_FOLDER}/lib")
-            os.remove(f"{CodificationCrawler.RAW_DATA_FOLDER}/BoPhapDien.html")
+            # os.remove(f"{CodificationCrawler.RAW_DATA_FOLDER}/lib")
+            # os.remove(f"{CodificationCrawler.RAW_DATA_FOLDER}/BoPhapDien.html")
             print(f'Extracted {CodificationCrawler.ZIP_FILE} to {CodificationCrawler.RAW_DATA_FOLDER}')
         except zipfile.BadZipFile:
             print(f'Failed to extract {CodificationCrawler.ZIP_FILE}')
@@ -128,20 +128,25 @@ class CodificationCrawler:
     @staticmethod
     def process_data():
         def process_file(file):
-            with open(CodificationCrawler.RAW_DATA_FOLDER + '/demuc/' + file, 'r', encoding='utf-8') as f:
-                text = f.read()
-                text = text.split('Chương')
-                content = []
-                for i in range(1, len(text)):
-                    chapter = text[i].split('Mục')[0].strip()
-                    section = text[i].split('Điều')[0].strip()
-                    article = text[i].split('Điều')[1].strip()
-                    content.append({
-                        'chapter': chapter,
-                        'section': section,
-                        'article': article
-                    })
-                return content
+            print(f'Processing file {file}')
+            try:
+                with open(CodificationCrawler.RAW_DATA_FOLDER + '/demuc/' + file, 'r', encoding='utf-8') as f:
+                    text = f.read()
+                    text = text.split('Chương')
+                    content = []
+                    for i in range(1, len(text)):
+                        chapter = text[i].split('Mục')[0].strip()
+                        section = text[i].split('Điều')[0].strip()
+                        article = text[i].split('Điều')[1].strip()
+                        content.append({
+                            'chapter': chapter,
+                            'section': section,
+                            'article': article
+                        })
+                    return content
+            except:
+                print(f'Error processing file {file}')
+                return []
 
         files = os.listdir(CodificationCrawler.RAW_DATA_FOLDER + '/demuc')
         files = [f for f in files if f.endswith('.txt')]
@@ -157,3 +162,6 @@ class CodificationCrawler:
             writer = csv.DictWriter(f, fieldnames=data[0].keys())
             writer.writeheader()
             writer.writerows(data)
+
+if __name__ == '__main__':
+    CodificationCrawler.process_data()
